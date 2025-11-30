@@ -19,9 +19,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          # Make sure the release step uses its own credentials:
-          # https://github.com/cycjimmy/semantic-release-action#private-packages
-          persist-credentials: false
+          # Configura el token para el checkout
+          token: ${{ secrets.SECRET_TOKEN }}
+          persist-credentials: true
           fetch-depth: 0
       - name: Setup JDK
         uses: actions/setup-java@v3
@@ -36,7 +36,12 @@ jobs:
           cache: 'npm'
       - name: Setup semantic-release
         run: npm install
+      - name: Configure Git
+        run: |
+          git config --global user.name "${{ secrets.SECRET_USER }}"
+          git config --global user.email "${{ secrets.SECRET_USER }}@users.noreply.github.com"
       - name: Release
         env:
-          GITHUB_TOKEN: ${{ secrets.REPOSITORY_PUSH_ACCESS }}
+          # Usa el SECRET_TOKEN para semantic-release
+          GITHUB_TOKEN: ${{ secrets.SECRET_TOKEN }}
         run: npm exec semantic-release
