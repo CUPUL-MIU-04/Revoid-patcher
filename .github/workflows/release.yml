@@ -11,7 +11,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    # Solo ejecutar desde el repositorio principal, no desde forks
+    # Esta condición es importante para evitar ejecuciones en PRs de forks
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
     
     steps:
@@ -19,7 +19,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.REVOID_TOKEN }}
+          persist-credentials: true
       
       - name: Setup JDK
         uses: actions/setup-java@v3
@@ -42,10 +43,11 @@ jobs:
       
       - name: Configure Git
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "${{ secrets.REVOID_USER }}"
+          git config --global user.email "${{ secrets.REVOID_USER }}@users.noreply.github.com"
       
       - name: Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.REVOID_TOKEN }}
+          NPM_TOKEN: "dummy"  # Si no usas NPM, esto evita advertencias
         run: npm exec semantic-release
