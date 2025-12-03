@@ -16,7 +16,9 @@
       {
         "assets": [
           "CHANGELOG.md",
-          "gradle.properties"
+          "gradle.properties",
+          "package.json",
+          "package-lock.json"
         ],
         "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
@@ -24,14 +26,19 @@
     [
       "@saithodev/semantic-release-backmerge",
       {
-        "backmergeBranches": [{"from": "master", "to": "dev"}],
-        "clearWorkspace": true
+        "backmergeBranches": [
+          {"from": "master", "to": "dev"}
+        ],
+        "clearWorkspace": true,
+        "gitAuthorName": "CUPUL-MIU-04",
+        "gitAuthorEmail": "186883140+CUPUL-MIU-04@users.noreply.github.com"
       }
     ],
     [
       "@semantic-release/github",
       {
-        "successComment": false
+        "successComment": false,
+        "labels": ["release"]
       }
     ]
   ]
