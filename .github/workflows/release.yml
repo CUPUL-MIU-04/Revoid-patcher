@@ -6,42 +6,46 @@ on:
     branches:
       - master
       - dev
-  pull_request:
-    branches:
-      - master
-      - dev
 
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    # Solo ejecutar desde el repositorio principal, no desde forks
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
+    
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          token: ${{ secrets.SECRET_TOKEN }}
-          persist-credentials: true
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
       - name: Setup JDK
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'zulu'
           cache: gradle
+      
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "18"
           cache: 'npm'
+      
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+      
       - name: Setup semantic-release
-        run: npm install
+        run: npm ci
+      
       - name: Configure Git
         run: |
-          git config --global user.name "${{ secrets.SECRET_USER }}"
-          git config --global user.email "${{ secrets.SECRET_USER }}@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      
       - name: Release
         env:
-          GITHUB_TOKEN: ${{ secrets.SECRET_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm exec semantic-release
