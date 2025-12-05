@@ -1,37 +1,45 @@
 plugins {
-    kotlin("jvm") version "1.8.21"
+    kotlin("jvm") version "1.9.22"
     `maven-publish`
     signing
 }
 
 group = "com.revoid"
+version = "1.2.1.2.20251203135827"
 
-val githubUsername: String = project.findProperty("gpr.user") as? String ?: System.getenv("GITHUB_ACTOR")
-val githubPassword: String = project.findProperty("gpr.key") as? String ?: System.getenv("GITHUB_TOKEN")
+val githubUsername: String? = project.findProperty("gpr.user") as? String ?: System.getenv("GITHUB_ACTOR")
+val githubPassword: String? = project.findProperty("gpr.key") as? String ?: System.getenv("GITHUB_TOKEN")
 
 repositories {
     mavenCentral()
     mavenLocal()
     maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") }
     maven { url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2") }
-    maven {
-        url = uri("https://maven.pkg.github.com/CUPUL-MIU-04/smali")
-        credentials {
-            username = githubUsername
-            password = githubPassword
+    
+    // Solo agregar repositorio de GitHub si tenemos credenciales
+    if (githubUsername != null && githubPassword != null) {
+        maven {
+            url = uri("https://maven.pkg.github.com/CUPUL-MIU-04/smali")
+            credentials {
+                username = githubUsername
+                password = githubPassword
+            }
         }
     }
 }
 
 dependencies {
     implementation("xpp3:xpp3:1.1.4c")
-    implementation("com.revoid:smali:2.5.3-a3836654")
-    implementation("com.revoid:multidexlib2:2.5.3-a3836654-SNAPSHOT")
+    
+    // Solo agregar si tenemos acceso
+    if (githubUsername != null && githubPassword != null) {
+        implementation("com.revoid:smali:2.5.3-a3836654")
+        implementation("com.revoid:multidexlib2:2.5.3-a3836654-SNAPSHOT")
+    }
+    
     implementation("io.github.reandroid:ARSCLib:1.1.7")
-
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.22")
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.22")
-
     compileOnly("com.google.android:android:4.1.1.4")
 }
 
@@ -57,7 +65,7 @@ kotlin {
 
 publishing {
     publications {
-        register<MavenPublication>("gpr") {
+        register<MavenPublication>("mavenJava") {
             from(components["java"])
             
             groupId = "com.revoid"
@@ -93,6 +101,7 @@ publishing {
     }
     
     repositories {
+        // Publicar en GitHub Packages solo si tenemos credenciales
         if (githubUsername != null && githubPassword != null) {
             maven {
                 name = "GitHubPackages"
@@ -102,39 +111,20 @@ publishing {
                     password = githubPassword
                 }
             }
-        }
-        
-        val ossrhToken = System.getenv("OSSRH_TOKEN")
-        val ossrhPassword = System.getenv("OSSRH_PASSWORD")
-        if (ossrhToken != null && ossrhPassword != null) {
-            maven {
-                name = "Sonatype"
-                url = if (project.version.toString().contains("SNAPSHOT")) {
-                    uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-                } else {
-                    uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-                }
-                credentials {
-                    username = ossrhToken
-                    password = ossrhPassword
-                }
-            }
         } else {
+            // Si no, publicar localmente
             mavenLocal()
         }
     }
 }
 
 signing {
-    if (
-        System.getenv("GPG_KEY_ID") == null
-        || System.getenv("GPG_KEY") == null
-        || System.getenv("GPG_KEY_PASSWORD") == null
-    ) return@signing
-    useInMemoryPgpKeys(
-        System.getenv("GPG_KEY_ID"),
-        System.getenv("GPG_KEY"),
-        System.getenv("GPG_KEY_PASSWORD"),
-    )
-    sign(publishing.publications)
+    val gpgKeyId = System.getenv("GPG_KEY_ID")
+    val gpgKey = System.getenv("GPG_KEY")
+    val gpgPassword = System.getenv("GPG_KEY_PASSWORD")
+    
+    if (gpgKeyId != null && gpgKey != null && gpgPassword != null) {
+        useInMemoryPgpKeys(gpgKeyId, gpgKey, gpgPassword)
+        sign(publishing.publications)
+    }
 }
