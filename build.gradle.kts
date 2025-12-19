@@ -5,54 +5,12 @@ plugins {
     `java-library`
 }
 
+// IMPORTANTE: Define explícitamente la versión
+version = "1.0.0"  // Usa la misma versión que tu release v1.0.0
 group = "com.revoid"
-// IMPORTANTE: Define la versión aquí o déjala como variable
-version = "1.0.0" // O usa: version = project.properties["version"] ?: "1.0.0-SNAPSHOT"
-
-// IMPORTANTE: Cambia estas líneas para usar GITHUB_ACTOR y GITHUB_TOKEN
-val githubUsername: String = project.findProperty("gpr.user") as? String ?: System.getenv("GITHUB_ACTOR")
-val githubPassword: String = project.findProperty("gpr.key") as? String ?: System.getenv("GITHUB_TOKEN")
 
 repositories {
     mavenCentral()
-    // IMPORTANTE: Asegúrate de que estas URLs sean correctas
-    maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") }
-    maven { 
-        url = uri("https://maven.pkg.github.com/CUPUL-MIU-04/smali")
-        credentials {
-            username = githubUsername
-            password = githubPassword
-        }
-    }
-}
-
-dependencies {
-    implementation("xpp3:xpp3:1.1.4c")
-    implementation("com.revoid:smali:2.5.3-a3836655")
-    implementation("com.revoid:multidexlib2:2.5.3-a3836655-SNAPSHOT")
-    implementation("io.github.reandroid:ARSCLib:1.1.7")
-
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.22")
-    testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.22")
-
-    compileOnly("com.google.android:android:4.1.1.4")
-}
-
-tasks {
-    test {
-        useJUnitPlatform()
-        testLogging {
-            events("PASSED", "SKIPPED", "FAILED")
-        }
-    }
-    
-    // Añade esta tarea para procesar recursos correctamente
-    processResources {
-        filteringCharset = "UTF-8"
-        filesMatching("**/*.properties") {
-            expand(project.properties)
-        }
-    }
 }
 
 java {
@@ -60,18 +18,15 @@ java {
     withJavadocJar()
 }
 
-kotlin {
-    jvmToolchain(17)
-}
-
 publishing {
     publications {
-        create<MavenPublication>("github") {
+        create<MavenPublication>("revoid-patcher") {
+            // IMPORTANTE: Cambia esto a 'repositories' para usar el nombre correcto
             from(components["java"])
             
             groupId = "com.revoid"
             artifactId = "revoid-patcher"
-            version = project.version.toString()
+            version = version
             
             pom {
                 name.set("ReVoid Patcher")
@@ -106,21 +61,9 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/CUPUL-MIU-04/Revoid-patcher")
             credentials {
-                username = githubUsername
-                password = githubPassword
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
             }
         }
-    }
-}
-
-// Configuración opcional para signing (si quieres firmar los paquetes)
-signing {
-    // Solo firma si las variables de entorno están definidas
-    val signingKey = System.getenv("SIGNING_KEY")
-    val signingPassword = System.getenv("SIGNING_PASSWORD")
-    
-    if (signingKey != null && signingPassword != null) {
-        useInMemoryPgpKeys(signingKey, signingPassword)
-        sign(publishing.publications["github"])
     }
 }
