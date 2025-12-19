@@ -25,8 +25,8 @@ repositories {
 
 dependencies {
     implementation("xpp3:xpp3:1.1.4c")
-    implementation("com.revoid:smali:2.5.3-a3836654")
-    implementation("com.revoid:multidexlib2:2.5.3-a3836654-SNAPSHOT")
+    implementation("com.revoid:smali:2.5.3-a3836655")
+    implementation("com.revoid:multidexlib2:2.5.3-a3836655-SNAPSHOT")
     implementation("io.github.reandroid:ARSCLib:1.1.7")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.22")
