@@ -5,6 +5,13 @@
 
 * remove gradle-semantic-release-plugin and set up separate publish workflow ([e0bcb97](https://github.com/CUPUL-MIU-04/Revoid-patcher/commit/e0bcb97009b6e8230351f221e644aa2a1994d2b3))
 
+# 1.0.0 (2025-12-20)
+
+
+### Bug Fixes
+
+* remove gradle-semantic-release-plugin and set up separate publish workflow ([e0bcb97](https://github.com/CUPUL-MIU-04/Revoid-patcher/commit/e0bcb97009b6e8230351f221e644aa2a1994d2b3))
+
 # 1.0.0 (2025-12-19)
 
 
